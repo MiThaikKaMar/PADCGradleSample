@@ -1,0 +1,99 @@
+apply plugin: 'com.android.application'
+
+apply plugin: 'kotlin-android'
+
+apply plugin: 'kotlin-android-extensions'
+
+apply plugin: 'me.moallemi.advanced-build-version'
+
+
+advancedVersioning {
+    nameOptions {
+        versionMajor 0
+        versionMinor 3
+        versionPatch 6
+    }
+    codeOptions {
+        versionCodeType 'AUTO_INCREMENT_ONE_STEP'
+        dependsOnTasks 'release' // defaultValue
+    }
+    outputOptions {
+        renameOutput true
+        nameFormat 'GradleSample-v ${versionName}'
+    }
+}
+
+def appVersionName = advancedVersioning.versionName
+def appVersionCode = advancedVersioning.versionCode
+
+android {
+    compileSdkVersion 30
+    buildToolsVersion "30.0.1"
+
+    defaultConfig {
+        applicationId "com.padcmyanmar.padcx.padcgradlesample"
+        minSdkVersion 23
+        targetSdkVersion 30
+//        versionCode 1
+//        versionName "1.0"
+        versionCode appVersionCode
+        versionName appVersionName
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField 'String', 'BASE_URL', "${credentialData}"
+    }
+    buildTypes {
+        release {
+            minifyEnabled true
+            debuggable false
+//            resourceShrinking true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    productFlavors {
+        flavorDimensions "appModule"
+        def BASE_URL_FIELD = "BASE_URL_FIELD"
+        def BASE_DEV_URL = "\"https//google.com/movie/dev\""
+        def BASE_PROD_URL = "\"https//google.com/movie/prod\""
+        def BASE_STAGING_URL = "\"https//google.com/movie/staging\""
+
+        dev {
+            dimension "appModule"
+            applicationIdSuffix = ".dev"
+            manifestPlaceholders = [appName: "@string/app_name_dev"]
+            buildConfigField 'String', BASE_URL_FIELD, BASE_DEV_URL
+        }
+        prod {
+            dimension "appModule"
+            applicationIdSuffix = ".prod"
+            manifestPlaceholders = [appName: "@string/app_name_prod"]
+            buildConfigField 'String', BASE_URL_FIELD, BASE_PROD_URL
+        }
+        staging {
+            dimension "appModule"
+            applicationIdSuffix = ".staging"
+            manifestPlaceholders = [appName: "@string/app_name_staging"]
+            buildConfigField 'String', BASE_URL_FIELD, BASE_STAGING_URL
+        }
+    }
+}
+
+dependencies {
+
+    //define shared module
+    implementation project(':shared')
+
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation 'androidx.appcompat:appcompat:1.0.2'
+    implementation 'androidx.core:core-ktx:1.0.2'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
+
+    //Glide
+    implementation rootProject.ext.libraries.glide
+
+}
